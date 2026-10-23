@@ -61,11 +61,11 @@ header .en{font-family:"Cormorant Garamond",serif;font-style:italic;letter-spaci
 .big{font-family:"Cormorant Garamond",serif;font-size:30px;background:linear-gradient(100deg,#c9a66b,#f3e3bd,#c9a66b);-webkit-background-clip:text;background-clip:text;color:transparent}
 button,.btn{background:linear-gradient(100deg,rgba(201,180,138,.06),rgba(243,227,189,.14),rgba(201,180,138,.06))}
 footer{text-align:center;padding:10px 0 40px}footer .muted{letter-spacing:.2em}
-@media(max-width:520px){.hero{height:260px}}@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0}.pcard{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:22px 10px;border:1px solid rgba(201,180,138,.2);background:linear-gradient(160deg,rgba(24,34,29,.75),rgba(10,14,12,.8));cursor:pointer;transition:all .4s}.pcard input{display:none}.pcard .pin svg{width:44px;height:44px}.pcard b{font-weight:300;color:#e9d6ad;letter-spacing:.15em}.pcard .big{font-size:24px}.pcard:has(input:checked){border-color:#e9d6ad;box-shadow:0 0 0 1px #c9b48a,0 0 30px rgba(243,227,189,.15)}nav a{border:0}@media(max-width:520px){.hero{height:200px}}@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
 const CLOVER=`<svg viewBox="0 0 24 24" fill="none" stroke="#e9d6ad" stroke-width=".9"><path d="M12 12c-3-3-5.5-4.5-5.5-6.5a2.75 2.75 0 0 1 5.5 0 2.75 2.75 0 0 1 5.5 0C17.5 7.5 15 9 12 12zM12 12c3 3 5.5 4.5 5.5 6.5a2.75 2.75 0 0 1-5.5 0 2.75 2.75 0 0 1-5.5 0C6.5 16.5 9 15 12 12zM12 12c3-3 4.5-5.5 6.5-5.5a2.75 2.75 0 0 1 0 5.5 2.75 2.75 0 0 1 0 5.5C16.5 17.5 15 15 12 12zM12 12c-3 3-4.5 5.5-6.5 5.5a2.75 2.75 0 0 1 0-5.5 2.75 2.75 0 0 1 0-5.5C7.5 6.5 9 9 12 12z"/><circle cx="12" cy="12" r="1" fill="#f3e3bd"/></svg>`;const ORN=`<div class="orn">${CLOVER}</div>`;
 const page=(t,b)=>`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t}｜鎏光敘物</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+TC:wght@200;300;400&display=swap"><style>${css}</style></head><body><div class="frame"></div><header><h1>鎏光敘物</h1><div class="en">Liuguang · Maison de Joaillerie</div>${ORN}</header><section class="hero"><img src="/static/hero.jpg" alt="鎏光敘物 幸運草・十字"><span class="cnr c1"></span><span class="cnr c2"></span><span class="cnr c3"></span><span class="cnr c4"></span><div class="cap"><b>${t}</b><i>Trèfle · Croix · 925 & Or Pur</i></div></section><main>${b}</main><footer>${ORN}<p class="muted">© 鎏光敘物 · 925銀包純金 · 每件附保卡</p></footer></body></html>`;
 // customer order
-app.get('/',(q,r)=>{const ag=A(q.query.ref);const pr=p=>ag?agentPrice(ag,p):p.price;
+app.get('/shop',(q,r)=>{const ag=A(q.query.ref);const pr=p=>ag?agentPrice(ag,p):p.price;
 r.send(page('訂購',`${ag?`<div class="ok">推薦代理：${esc(ag.name)}（${ag.code}）</div>`:''}
 ${db.products.map(p=>`<div class="card"><h3>${esc(p.name)}</h3><div class="big">${fmt(pr(p))}</div><p>${esc(p.desc)}</p>${p.direct?'<p class="muted">此款為公司直營販售，不經代理。</p>':''}<p class="muted">材質：925銀包純金（非18K、無鑽石），金重／銀重詳見保卡</p></div>`).join('')}
 <form class="card" method="post" action="/order"><h3>填寫訂單</h3>
@@ -73,19 +73,75 @@ ${db.products.map(p=>`<div class="card"><h3>${esc(p.name)}</h3><div class="big">
 <label>數量</label><input name="qty" type="number" min="1" max="20" value="1" required>
 <label>姓名</label><input name="name" required><label>電話</label><input name="phone" type="tel" required>
 <label>收件地址</label><input name="address" required><label>代理代碼</label><input name="agentCode" value="${ag?ag.code:''}" placeholder="例如 AMY01"><p class="muted">幸運草需填代理代碼；小十字為公司直營，免填。</p>
-<label>備註</label><input name="note"><button>送出訂單</button><p class="muted">付款方式：銀行轉帳，確認入帳後出貨。</p></form>
-<p class="muted" style="text-align:center"><a href="/agent">代理登入</a> · <a href="/admin">管理後台</a></p>`))});
+<label>備註</label><input name="note"><button>送出訂單</button><p class="muted">確認收款後出貨。</p></form>
+`))});
 app.post('/order',(q,r)=>{const b=q.body,p=P(b.productId),ag=A(b.agentCode),qty=parseInt(b.qty);
 const direct=p&&p.direct;if(!p||(!direct&&(!ag||!ag.active))||!(qty>=1&&qty<=20)||!b.name||!b.phone||!b.address)return r.send(page('錯誤',`<div class="err">資料有誤或代理代碼不存在，請返回修改。</div><p><a href="javascript:history.back()">返回</a></p>`));
 const up=direct?p.price:agentPrice(ag,p);if(up<MIN)return r.send(page('錯誤','<div class="err">售價低於最低零售價，無法成立訂單。</div>'));
 const o={id:db.seq++,created:new Date().toISOString(),productId:p.id,qty,unitPrice:up,agentCode:direct?null:ag.code,name:b.name,phone:b.phone,address:b.address,note:b.note||'',paid:0,paidAt:null,shipped:0};db.orders.push(o);save();
 r.send(page('訂單成立',`<div class="card"><h2>訂單成立</h2><p>訂單編號：<b>#${o.id}</b></p><p>${esc(p.name)} × ${qty}</p><p class="big">應付 ${fmt(qty*up)}</p>
-<p>請轉帳至：<br>（示範）銀行 000 帳號 0000-0000-0000<br>戶名：鎏光敘物</p><p class="muted">${direct?'轉帳後請私訊官方帳號告知末五碼':'轉帳後請將末五碼告知代理 '+esc(ag.name)}，確認入帳後出貨。</p><a class="btn" href="/${ag&&!direct?'?ref='+ag.code:''}">返回</a></div>`))});
+<p class="muted">確認收款後出貨。</p><a class="btn" href="${sess(q)?.agent?'/agent/order':'/shop'+(ag&&!direct?'?ref='+ag.code:'')}">返回</a>${sess(q)?.agent?' <a class="btn btn2" href="/agent">我的後台</a>':''}</div>`))});
 // agent
-app.get('/agent',(q,r)=>{const s=sess(q);if(!s||!s.agent)return r.send(page('代理登入',`<form class="card" method="post" action="/agent/login"><h2>代理登入</h2><label>代理代碼</label><input name="code" required><label>PIN</label><input name="pin" type="password" inputmode="numeric" required><button>登入</button></form>`));
-const ag=A(s.agent),ym=q.query.m||nowYm(),st=settle(ag.code,ym),nt=nextTier(st.pcs),link=`${q.protocol}://${q.get('host')}/?ref=${ag.code}`;
+const LOGIN=`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>鎏光敘物｜代理入口</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+TC:wght@200;300&display=swap">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#050706;color:#e8e2d4;font-family:"Cormorant Garamond","Noto Serif TC",serif;font-weight:300;overflow:hidden}
+.bg{position:fixed;inset:-40px;background:url(/static/hero.jpg) center 40%/cover;filter:brightness(.28) saturate(.7) blur(1px);transform:scale(1.08);transition:transform .2s ease-out;animation:bgIn 3s ease both}
+@keyframes bgIn{from{opacity:0;transform:scale(1.2)}}
+.veil{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(12,22,17,.35),rgba(5,7,6,.92) 75%)}
+.sweep{position:fixed;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 42%,rgba(243,227,189,.09) 50%,transparent 58%);background-size:300% 100%;animation:sw 9s ease-in-out 3s infinite}@keyframes sw{0%{background-position:130% 0}70%,100%{background-position:-30% 0}}
+canvas{position:fixed;inset:0;pointer-events:none}
+.frame{position:fixed;inset:12px;border:1px solid rgba(201,180,138,.2);pointer-events:none;animation:fd 2s ease 2.6s both}
+.wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.mark{width:96px;height:96px}.mark path{fill:none;stroke:url(#g);stroke-width:.6;stroke-linecap:round;stroke-dasharray:80;stroke-dashoffset:80;animation:draw 2.2s cubic-bezier(.6,.1,.3,1) forwards}
+.mark path:nth-child(2){animation-delay:.25s}.mark path:nth-child(3){animation-delay:.5s}.mark path:nth-child(4){animation-delay:.75s}
+.mark circle{fill:#f3e3bd;opacity:0;animation:fd .8s ease 2.2s forwards,glow 3s ease-in-out 3s infinite alternate}
+.mark{filter:drop-shadow(0 0 10px rgba(243,227,189,.35));animation:rot 60s linear 3s infinite}
+@keyframes draw{to{stroke-dashoffset:0}}@keyframes fd{from{opacity:0}to{opacity:1}}@keyframes glow{to{filter:drop-shadow(0 0 6px #fff)}}@keyframes rot{to{transform:rotate(360deg)}}
+h1{margin:22px 0 4px;font-family:"Noto Serif TC",serif;font-weight:200;font-size:34px;letter-spacing:.6em;padding-left:.6em;background:linear-gradient(100deg,#8e6f3e,#f3e3bd 40%,#fff8e6 50%,#c9a66b 60%,#8e6f3e);background-size:250% auto;-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;animation:up 1.4s ease 1.9s forwards,sh 6s linear 3.3s infinite}
+@keyframes sh{to{background-position:-250% center}}@keyframes up{from{opacity:0;transform:translateY(10px);letter-spacing:.9em}to{opacity:1}}
+.en{font-style:italic;letter-spacing:.5em;color:#a8987a;font-size:13px;opacity:0;animation:fd 1.2s ease 2.5s forwards}
+.line{width:0;height:1px;margin:26px auto;background:linear-gradient(90deg,transparent,#c9b48a,transparent);animation:ln 1.6s ease 2.6s forwards}@keyframes ln{to{width:240px}}
+form{width:100%;max-width:320px;opacity:0;animation:up 1.2s ease 3s forwards}
+.f{position:relative;margin:0 0 22px}.f label{display:block;font-size:11px;letter-spacing:.45em;color:#a89c80}
+.f input{width:100%;padding:12px 2px;background:transparent;border:0;border-bottom:1px solid rgba(201,180,138,.35);color:#f3e3bd;font:300 18px "Cormorant Garamond",serif;letter-spacing:.3em;outline:0;transition:all .5s;border-radius:0}
+.f input:focus{border-color:#f3e3bd;box-shadow:0 10px 18px -14px rgba(243,227,189,.9)}
+.f:after{content:"";position:absolute;left:50%;right:50%;bottom:0;height:1px;background:#fff3d6;transition:all .6s}.f:focus-within:after{left:0;right:0;box-shadow:0 0 8px #f3e3bd}
+button{position:relative;overflow:hidden;width:100%;margin-top:10px;padding:15px;background:linear-gradient(100deg,rgba(201,180,138,.08),rgba(243,227,189,.18),rgba(201,180,138,.08));border:1px solid #c9b48a;color:#f3e3bd;font:300 15px "Noto Serif TC",serif;letter-spacing:.8em;padding-left:.8em;cursor:pointer;transition:all .5s}
+button:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,248,230,.45),transparent);transform:skewX(-20deg);animation:bs 4s ease-in-out 4s infinite}@keyframes bs{0%{left:-60%}35%,100%{left:130%}}
+button:hover{background:#c9b48a;color:#07090a;box-shadow:0 0 30px rgba(243,227,189,.3)}
+.ft{position:fixed;bottom:26px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.4em;color:#6f6956;opacity:0;animation:fd 2s ease 3.4s forwards}
+@media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}.mark path{stroke-dashoffset:0}canvas{display:none}}
+</style></head><body>
+<div class="bg" id="bg"></div><div class="veil"></div><canvas id="c"></canvas><div class="sweep"></div><div class="frame"></div>
+<div class="wrap">
+<svg class="mark" viewBox="0 0 24 24"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#a8874f"/><stop offset=".5" stop-color="#fff3d6"/><stop offset="1" stop-color="#c9a66b"/></linearGradient></defs>
+<path d="M12 12c-3-3-5.5-4.5-5.5-6.5a2.75 2.75 0 0 1 5.5 0 2.75 2.75 0 0 1 5.5 0C17.5 7.5 15 9 12 12z"/><path d="M12 12c3-3 4.5-5.5 6.5-5.5a2.75 2.75 0 0 1 0 5.5 2.75 2.75 0 0 1 0 5.5C16.5 17.5 15 15 12 12z"/><path d="M12 12c3 3 5.5 4.5 5.5 6.5a2.75 2.75 0 0 1-5.5 0 2.75 2.75 0 0 1-5.5 0C6.5 16.5 9 15 12 12z"/><path d="M12 12c-3 3-4.5 5.5-6.5 5.5a2.75 2.75 0 0 1 0-5.5 2.75 2.75 0 0 1 0-5.5C7.5 6.5 9 9 12 12z"/><circle cx="12" cy="12" r=".9"/></svg>
+<h1>鎏光敘物</h1><div class="en">Maison de Joaillerie</div><div class="line"></div>
+<form method="post" action="/agent/login"><div class="f"><label>代理代碼</label><input name="code" autocomplete="username" autocapitalize="characters" required></div><div class="f"><label>PIN</label><input name="pin" type="password" inputmode="numeric" autocomplete="current-password" required></div><button>進入</button></form>
+</div><div class="ft">AGENTS ONLY · 代理專屬入口</div>
+<script>
+(function(){var c=document.getElementById('c'),x=c.getContext('2d'),W,H,P=[];if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+function rs(){W=c.width=innerWidth*devicePixelRatio;H=c.height=innerHeight*devicePixelRatio;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px'}rs();addEventListener('resize',rs);
+for(var i=0;i<46;i++)P.push({x:Math.random(),y:Math.random(),r:Math.random()*2.2+.4,b:Math.random()<.18,v:Math.random()*.00025+.00008,p:Math.random()*6.28});
+(function f(t){x.clearRect(0,0,W,H);P.forEach(function(o){o.y-=o.v;if(o.y<-.05)o.y=1.05;var a=.25+.35*Math.sin(t/900+o.p),X=(o.x+Math.sin(t/4000+o.p)*.01)*W,Y=o.y*H,R=o.r*devicePixelRatio*(o.b?5:1);var g=x.createRadialGradient(X,Y,0,X,Y,R*2);g.addColorStop(0,'rgba(243,227,189,'+(o.b?a*.35:a)+')');g.addColorStop(1,'rgba(243,227,189,0)');x.fillStyle=g;x.beginPath();x.arc(X,Y,R*2,0,6.28);x.fill()});requestAnimationFrame(f)})(0);
+var bg=document.getElementById('bg');function mv(px,py){bg.style.transform='scale(1.08) translate('+px*14+'px,'+py*14+'px)'}
+addEventListener('mousemove',function(e){mv(e.clientX/innerWidth-.5,e.clientY/innerHeight-.5)});addEventListener('deviceorientation',function(e){if(e.gamma!=null)mv(e.gamma/45,(e.beta-45)/45)});})();
+</script></body></html>
+`;
+app.get('/',(q,r)=>{if(q.query.ref)return r.redirect('/shop?ref='+encodeURIComponent(q.query.ref));if(sess(q)?.agent)return r.redirect('/agent');r.send(LOGIN)});
+app.get('/agent/order',(q,r)=>{const s=sess(q);if(!s?.agent)return r.redirect('/');const ag=A(s.agent),cp=cloverPaid(ag.code,nowYm());
+r.send(page('選品下單',`<nav><a href="/agent/order">✦ 下單</a><a href="/agent">後台</a><a href="/agent/logout">登出</a></nav>
+<div class="pgrid">${db.products.map(p=>`<label class="pcard"><input type="radio" name="productId" value="${p.id}" form="of" ${p.id=='clover'?'checked':''} required><span class="pin">${p.id=='clover'?CLOVER:'<svg viewBox="0 0 24 24" fill="none" stroke="#e9d6ad" stroke-width=".9"><path d="M10.5 3h3v6h5v3h-5v9h-3v-9h-5V9h5z"/></svg>'}</span><b>${esc(p.name)}</b><span class="big">${fmt(agentPrice(ag,p))}</span><small class="muted">${p.direct?'公司直營・固定價':(cp<LOCK?'本月已付款 '+cp+' 條・滿 3 條前鎖定':'依您的自訂售價')}</small></label>`).join('')}</div>
+<form id="of" class="card" method="post" action="/order"><h3>客戶資料</h3><input type="hidden" name="agentCode" value="${ag.code}">
+<label>數量</label><input name="qty" type="number" min="1" max="20" value="1" required>
+<label>客戶姓名</label><input name="name" required><label>電話</label><input name="phone" type="tel" required>
+<label>收件地址</label><input name="address" required><label>備註</label><input name="note"><button>送出訂單</button>
+<p class="muted">幸運草計入您的當月件數（付款確認後）；小十字為公司直營，不計入代理件數。</p></form>`))});
+app.get('/agent',(q,r)=>{const s=sess(q);if(!s||!s.agent)return r.redirect('/');
+const ag=A(s.agent),ym=q.query.m||nowYm(),st=settle(ag.code,ym),nt=nextTier(st.pcs),link=`${q.protocol}://${q.get('host')}/shop?ref=${ag.code}`;
 const mine=db.orders.filter(o=>o.agentCode==ag.code).slice().reverse();
-r.send(page('代理後台',`<nav><a href="/agent/logout">登出</a></nav><h2>${esc(ag.name)}（${ag.code}）</h2>${q.query.msg?`<div class="${q.query.e?'err':'ok'}">${esc(q.query.msg)}</div>`:''}
+r.send(page('代理後台',`<nav><a href="/agent/order">✦ 下單</a><a href="/agent">後台</a><a href="/agent/logout">登出</a></nav><h2>${esc(ag.name)}（${ag.code}）</h2>${q.query.msg?`<div class="${q.query.e?'err':'ok'}">${esc(q.query.msg)}</div>`:''}
 <div class="card"><form><label>月份</label><input type="month" name="m" value="${ym}" onchange="this.form.submit()"></form>
 <div class="grid"><div>本月已付款件數<div class="big">${st.pcs}</div></div><div>目前批發價<div class="big">${fmt(st.w)}</div></div>
 <div>零售總額<div>${fmt(st.retail)}</div></div><div>批發總額<div>${fmt(st.wholesale)}</div></div></div>
@@ -94,12 +150,12 @@ r.send(page('代理後台',`<nav><a href="/agent/logout">登出</a></nav><h2>${e
 <div class="card"><h3>我的專屬連結</h3><input readonly value="${link}" onclick="this.select()"><img src="/qr/${ag.code}.png" style="width:200px;background:#fff;padding:8px;border-radius:6px"><br><a class="btn btn2" href="/qr/${ag.code}.png" download="鎏光敘物-${ag.code}.png">下載 QR code</a></div>
 <form class="card" method="post" action="/agent/prices"><h3>我的售價</h3>${(()=>{const p=P('clover'),cp=cloverPaid(ag.code,nowYm()),lk=cp<LOCK;return `<label>${esc(p.name)}（定價 ${fmt(p.price)}）</label><input type="number" name="clover" min="${MIN}" max="${p.price}" value="${agentPrice(ag,p)}" ${lk?'disabled':''}>${lk?`<p class="muted">當月滿 3 條後可自訂 10,000–11,680（本月已付款 ${cp} 條，目前鎖定 ${fmt(p.price)}）</p>`:''}${lk?'':'<button>儲存</button>'}`})()}<p class="muted">小十字墜鍊目前為公司直營，不開放代理販售。</p></form>
 <div class="card wrap"><h3>我的訂單</h3><table><tr><th>#</th><th>日期</th><th>商品</th><th>數</th><th>單價</th><th>客戶</th><th>狀態</th></tr>${mine.map(o=>`<tr><td>${o.id}</td><td>${o.created.slice(5,10)}</td><td>${esc(P(o.productId)?.name)}</td><td>${o.qty}</td><td>${o.unitPrice}</td><td>${esc(o.name)}</td><td>${o.paid?'已付':'待付'}${o.shipped?'/已出貨':''}</td></tr>`).join('')}</table></div>`))});
-app.post('/agent/login',(q,r)=>{const ag=A(q.body.code);if(!ag||ag.pin!==q.body.pin||!ag.active)return r.send(page('登入失敗','<div class="err">代碼或 PIN 錯誤</div><a href="/agent">重試</a>'));login(r,{agent:ag.code});r.redirect('/agent')});
-app.get('/agent/logout',(q,r)=>{delete S[ck(q).sid];r.redirect('/agent')});
+app.post('/agent/login',(q,r)=>{const ag=A(q.body.code);if(!ag||ag.pin!==q.body.pin||!ag.active)return r.send(page('登入失敗','<div class="err">代碼或 PIN 錯誤</div><a class="btn" href="/">重試</a>'));login(r,{agent:ag.code});r.redirect('/agent')});
+app.get('/agent/logout',(q,r)=>{delete S[ck(q).sid];r.redirect('/')});
 app.post('/agent/prices',(q,r)=>{const s=sess(q);if(!s?.agent)return r.redirect('/agent');const ag=A(s.agent);
 const p=P('clover'),v=parseInt(q.body.clover);if(cloverPaid(ag.code,nowYm())<LOCK)return r.redirect('/agent?e=1&msg='+encodeURIComponent('當月滿 3 條後可自訂 10,000–11,680'));
 if(!(v>=MIN&&v<=p.price))return r.redirect('/agent?e=1&msg='+encodeURIComponent(`${p.name} 售價需介於 ${MIN} 與 ${p.price} 之間`));ag.prices.clover=v;save();r.redirect('/agent?msg='+encodeURIComponent('已儲存'))});
-app.get('/qr/:code.png',async(q,r)=>{const ag=A(q.params.code);if(!ag)return r.sendStatus(404);r.type('png').send(await QR.toBuffer(`${q.protocol}://${q.get('host')}/?ref=${ag.code}`,{width:600,margin:2}))});
+app.get('/qr/:code.png',async(q,r)=>{const ag=A(q.params.code);if(!ag)return r.sendStatus(404);r.type('png').send(await QR.toBuffer(`${q.protocol}://${q.get('host')}/shop?ref=${ag.code}`,{width:600,margin:2}))});
 // admin
 const isA=q=>sess(q)?.admin;
 app.post('/admin/login',(q,r)=>{if(q.body.pw!==ADMIN_PW)return r.send(page('失敗','<div class="err">密碼錯誤</div><a href="/admin">重試</a>'));login(r,{admin:1});r.redirect('/admin')});
@@ -111,7 +167,7 @@ r.send(page('管理後台',`<nav><a href="#settle">結算</a><a href="#orders">�
 <div class="card wrap" id="settle"><h3>月結算表</h3><form><input type="month" name="m" value="${ym}" onchange="this.form.submit()"></form>
 <table><tr><th>代理</th><th>件數</th><th>批發價</th><th>客付總額</th><th>公司應收(批發)</th><th>應付代理利潤</th></tr>${rows.map(x=>`<tr><td>${esc(x.a.name)}<br><span class="muted">${x.a.code}</span></td><td>${x.pcs}</td><td>${x.w}</td><td>${x.retail}</td><td>${x.wholesale}</td><td><b>${x.profit}</b></td></tr>`).join('')}
 <tr><th>合計</th><th>${tot.pcs}</th><th></th><th>${tot.retail}</th><th>${tot.wh}</th><th>${tot.pf}</th></tr></table>
-<p class="muted">只計入當月已付款訂單（以付款確認日為準）。客人轉帳給公司，公司月底把利潤（售價−批發價）付給代理。</p><a class="btn btn2" href="/admin/settle.csv?m=${ym}">匯出 CSV</a></div>
+<p class="muted">只計入當月已付款訂單（以付款確認日為準）。客人付款給公司，公司月底把利潤（售價−批發價）付給代理。</p><a class="btn btn2" href="/admin/settle.csv?m=${ym}">匯出 CSV</a></div>
 <div class="card wrap" id="orders"><h3>訂單</h3><p><a href="/admin?f=all#orders">全部</a> · <a href="/admin?f=unpaid#orders">待付款</a> · <a href="/admin?f=toship#orders">待出貨</a></p>
 <table><tr><th>#</th><th>日期</th><th>代理</th><th>商品×數</th><th>金額</th><th>客戶</th><th>操作</th></tr>${os.map(o=>`<tr><td>${o.id}</td><td>${o.created.slice(5,10)}</td><td>${o.agentCode||'公司直營'}</td><td>${esc(P(o.productId)?.name)}×${o.qty}</td><td>${o.qty*o.unitPrice}</td><td>${esc(o.name)}<br><span class="muted">${esc(o.phone)}<br>${esc(o.address)}</span></td>
 <td><form method="post" action="/admin/order/${o.id}"><button name="a" value="${o.paid?'unpaid':'paid'}" class="${o.paid?'btn2':''}" style="padding:6px 8px;font-size:12px">${o.paid?'已付✓':'標記已付'}</button> <button name="a" value="${o.shipped?'unship':'ship'}" class="${o.shipped?'btn2':''}" style="padding:6px 8px;font-size:12px">${o.shipped?'已出貨✓':'標記出貨'}</button></form></td></tr>`).join('')}</table></div>
