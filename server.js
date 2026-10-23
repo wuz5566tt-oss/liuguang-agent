@@ -1,5 +1,5 @@
 const express=require('express'),fs=require('fs'),crypto=require('crypto'),QR=require('qrcode');
-const app=express();app.use(express.urlencoded({extended:true}));
+const app=express();app.use(express.urlencoded({extended:true}));app.use('/static',express.static(__dirname+'/public',{maxAge:'7d'}));
 const DB='./db.json',ADMIN_PW=process.env.ADMIN_PW||'admin2026',MIN=10000;
 let db;const save=()=>fs.writeFileSync(DB,JSON.stringify(db,null,1));
 function seed(){const m=new Date(),ym=d=>d.toISOString();const ago=n=>new Date(Date.now()-n*864e5).toISOString();
@@ -29,7 +29,7 @@ const css=`*{box-sizing:border-box}body{margin:0;background:radial-gradient(elli
 a{color:#d8c39a;text-decoration:none;border-bottom:1px solid rgba(216,195,154,.3)}header{padding:48px 16px 32px;text-align:center}
 header h1{margin:0;font-weight:300;letter-spacing:.5em;font-size:28px;background:linear-gradient(100deg,#a8874f,#f3e3bd 45%,#c9a66b 55%,#8e6f3e);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:sh 8s ease-in-out infinite}
 @keyframes sh{50%{background-position:100% center}}header small{display:block;margin-top:8px;color:#8a8370;letter-spacing:.5em;font-size:10px}
-header:after{content:"";display:block;width:40px;height:1px;background:#c9b48a;margin:22px auto 0;opacity:.6}
+header:after{display:none!important;content:"";display:block;width:40px;height:1px;background:#c9b48a;margin:22px auto 0;opacity:.6}
 main{max-width:720px;margin:auto;padding:8px 20px 40px}.card{background:rgba(18,24,21,.6);border:1px solid rgba(201,180,138,.18);border-radius:2px;padding:28px 22px;margin:22px 0;animation:fi .8s ease both}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}}h2,h3{color:#d8c39a;font-weight:300;letter-spacing:.2em;margin-top:0}
 input,select,textarea{width:100%;padding:12px;margin:6px 0 16px;background:transparent;color:#e8e2d4;border:0;border-bottom:1px solid rgba(201,180,138,.35);font-size:16px;font-family:inherit;border-radius:0}
@@ -39,8 +39,31 @@ button:hover,.btn:hover{background:#c9b48a;color:#0c110f}.btn2{border-color:rgba
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:9px 6px;border-bottom:1px solid rgba(201,180,138,.12);text-align:left;vertical-align:top}th{color:#8a8370;font-weight:300}
 .wrap{overflow-x:auto}.muted{color:#8a8370;font-size:12.5px}.err{border:1px solid #7a4a3a;color:#e0b8a8;padding:12px}.ok{border:1px solid rgba(201,180,138,.4);color:#d8c39a;padding:12px}
 .big{font-size:24px;color:#e9d6ad;font-weight:300;letter-spacing:.08em}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}nav{text-align:center}nav a{margin:0 9px;font-size:13px;letter-spacing:.15em}
-label{font-size:12px;color:#a89c80;letter-spacing:.2em}hr{border:0;border-top:1px solid rgba(201,180,138,.15);margin:24px 0}@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
-const page=(t,b)=>`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t}｜鎏光敘物</title><style>${css}</style></head><body><header><h1>鎏光敘物</h1><small>LIUGUANG XUWU</small></header><main>${b}</main><p class="muted" style="text-align:center">© 鎏光敘物 · 925銀包純金 · 每件附保卡</p></body></html>`;
+label{font-size:12px;color:#a89c80;letter-spacing:.2em}hr{border:0;border-top:1px solid rgba(201,180,138,.15);margin:24px 0}
+html{background:#07090a}body{background-attachment:scroll!important;min-height:100vh;font-family:"Cormorant Garamond","Noto Serif TC","Songti TC",serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(1px 1px at 12% 18%,#f3e3bd,transparent),radial-gradient(1px 1px at 78% 32%,#e9d6ad,transparent),radial-gradient(1.5px 1.5px at 42% 72%,#f3e3bd,transparent),radial-gradient(1px 1px at 88% 82%,#c9b48a,transparent),radial-gradient(1px 1px at 24% 90%,#f3e3bd,transparent),radial-gradient(1px 1px at 60% 8%,#e9d6ad,transparent);animation:tw 6s ease-in-out infinite alternate;opacity:.55}
+@keyframes tw{0%{opacity:.15}100%{opacity:.7}}
+body>*{position:relative;z-index:1}
+.frame{position:fixed;inset:10px;border:1px solid rgba(201,180,138,.18);pointer-events:none;z-index:2}.frame:before,.frame:after{content:"✦";position:absolute;color:#c9b48a;font-size:11px;top:-9px;left:50%;transform:translateX(-50%);background:#07090a;padding:0 8px}.frame:after{top:auto;bottom:-9px}
+header h1{font-family:"Noto Serif TC",serif;font-weight:200;font-size:30px}
+header .en{font-family:"Cormorant Garamond",serif;font-style:italic;letter-spacing:.45em;color:#a8987a;font-size:12px;margin-top:6px}
+.orn{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px auto;color:#c9b48a;max-width:360px}.orn:before,.orn:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#c9b48a)}.orn:after{background:linear-gradient(270deg,transparent,#c9b48a)}
+.orn svg{width:22px;height:22px;filter:drop-shadow(0 0 6px rgba(243,227,189,.5));animation:spin 30s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.hero{position:relative;max-width:720px;margin:0 auto;height:340px;overflow:hidden;border:1px solid rgba(201,180,138,.28)}
+.hero img{width:100%;height:100%;object-fit:cover;object-position:center 40%;filter:saturate(.85) contrast(1.05) brightness(.95);animation:kb 22s ease-in-out infinite alternate}@keyframes kb{to{transform:scale(1.08)}}
+.hero:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(7,9,10,.1),rgba(7,9,10,.25) 50%,rgba(7,9,10,.95))}
+.hero:after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 40%,rgba(243,227,189,.22) 50%,transparent 60%);background-size:250% 100%;animation:gl 7s ease-in-out infinite}@keyframes gl{0%{background-position:150% 0}60%,100%{background-position:-50% 0}}
+.hero .cap{position:absolute;z-index:3;left:0;right:0;bottom:24px;text-align:center}.hero .cap b{display:block;font-weight:300;color:#f3e3bd;letter-spacing:.6em;font-size:18px}.hero .cap i{font-family:"Cormorant Garamond",serif;color:#c9b48a;letter-spacing:.3em;font-size:13px}
+.hero .cnr{position:absolute;z-index:3;width:26px;height:26px;border:1px solid #c9b48a}.c1{top:10px;left:10px;border-right:0!important;border-bottom:0!important}.c2{top:10px;right:10px;border-left:0!important;border-bottom:0!important}.c3{bottom:10px;left:10px;border-right:0!important;border-top:0!important}.c4{bottom:10px;right:10px;border-left:0!important;border-top:0!important}
+.card{position:relative;background:linear-gradient(160deg,rgba(24,34,29,.75),rgba(10,14,12,.8));box-shadow:0 20px 50px rgba(0,0,0,.45),inset 0 1px 0 rgba(243,227,189,.08)}
+.card:before{content:"";position:absolute;inset:5px;border:1px solid rgba(201,180,138,.08);pointer-events:none}
+.card h2,.card h3{text-align:center}.card h2:after,.card h3:after{content:"◆";display:block;font-size:7px;color:#c9b48a;margin-top:6px;letter-spacing:0}
+.big{font-family:"Cormorant Garamond",serif;font-size:30px;background:linear-gradient(100deg,#c9a66b,#f3e3bd,#c9a66b);-webkit-background-clip:text;background-clip:text;color:transparent}
+button,.btn{background:linear-gradient(100deg,rgba(201,180,138,.06),rgba(243,227,189,.14),rgba(201,180,138,.06))}
+footer{text-align:center;padding:10px 0 40px}footer .muted{letter-spacing:.2em}
+@media(max-width:520px){.hero{height:260px}}@media (prefers-reduced-motion:reduce){*{animation:none!important}}`;
+const CLOVER=`<svg viewBox="0 0 24 24" fill="none" stroke="#e9d6ad" stroke-width=".9"><path d="M12 12c-3-3-5.5-4.5-5.5-6.5a2.75 2.75 0 0 1 5.5 0 2.75 2.75 0 0 1 5.5 0C17.5 7.5 15 9 12 12zM12 12c3 3 5.5 4.5 5.5 6.5a2.75 2.75 0 0 1-5.5 0 2.75 2.75 0 0 1-5.5 0C6.5 16.5 9 15 12 12zM12 12c3-3 4.5-5.5 6.5-5.5a2.75 2.75 0 0 1 0 5.5 2.75 2.75 0 0 1 0 5.5C16.5 17.5 15 15 12 12zM12 12c-3 3-4.5 5.5-6.5 5.5a2.75 2.75 0 0 1 0-5.5 2.75 2.75 0 0 1 0-5.5C7.5 6.5 9 9 12 12z"/><circle cx="12" cy="12" r="1" fill="#f3e3bd"/></svg>`;const ORN=`<div class="orn">${CLOVER}</div>`;
+const page=(t,b)=>`<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t}｜鎏光敘物</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+TC:wght@200;300;400&display=swap"><style>${css}</style></head><body><div class="frame"></div><header><h1>鎏光敘物</h1><div class="en">Liuguang · Maison de Joaillerie</div>${ORN}</header><section class="hero"><img src="/static/hero.jpg" alt="鎏光敘物 幸運草・十字"><span class="cnr c1"></span><span class="cnr c2"></span><span class="cnr c3"></span><span class="cnr c4"></span><div class="cap"><b>${t}</b><i>Trèfle · Croix · 925 & Or Pur</i></div></section><main>${b}</main><footer>${ORN}<p class="muted">© 鎏光敘物 · 925銀包純金 · 每件附保卡</p></footer></body></html>`;
 // customer order
 app.get('/',(q,r)=>{const ag=A(q.query.ref);const pr=p=>ag?agentPrice(ag,p):p.price;
 r.send(page('訂購',`${ag?`<div class="ok">推薦代理：${esc(ag.name)}（${ag.code}）</div>`:''}
@@ -66,7 +89,7 @@ r.send(page('代理後台',`<nav><a href="/agent/logout">登出</a></nav><h2>${e
 <div class="card"><form><label>月份</label><input type="month" name="m" value="${ym}" onchange="this.form.submit()"></form>
 <div class="grid"><div>本月已付款件數<div class="big">${st.pcs}</div></div><div>目前批發價<div class="big">${fmt(st.w)}</div></div>
 <div>零售總額<div>${fmt(st.retail)}</div></div><div>批發總額<div>${fmt(st.wholesale)}</div></div></div>
-<p>本月可得利潤：<span class="big">${fmt(st.profit)}</span></p>${(()=>{const pn=db.orders.filter(o=>o.agentCode==ag.code&&o.productId=='clover'&&!o.paid&&ymOf(o.created)==ym).reduce((a,o)=>a+o.qty,0);return pn>0?`<p class="muted">待付款 ${pn} 條，確認收款後計入</p>`:''})()}<p class="muted">${nt?`再賣 ${nt[0]} 件升級到 ${fmt(nt[1])}／件（全月所有件數適用）`:'已達最高級距 NT$6,500'}</p>
+<p>本月可得利潤：<span class="big">${fmt(st.profit)}</span></p><p class="muted">${nt?`再賣 ${nt[0]} 件升級到 ${fmt(nt[1])}／件（全月所有件數適用）`:'已達最高級距 NT$6,500'}</p>
 <p class="muted">級距：1–2件 11,680｜3–5件 9,500｜6–8件 8,500｜9–19件 7,500｜20件以上 6,500（依當月已付款累計，全月適用）</p></div>
 <div class="card"><h3>我的專屬連結</h3><input readonly value="${link}" onclick="this.select()"><img src="/qr/${ag.code}.png" style="width:200px;background:#fff;padding:8px;border-radius:6px"><br><a class="btn btn2" href="/qr/${ag.code}.png" download="鎏光敘物-${ag.code}.png">下載 QR code</a></div>
 <form class="card" method="post" action="/agent/prices"><h3>我的售價</h3>${(()=>{const p=P('clover'),cp=cloverPaid(ag.code,nowYm()),lk=cp<LOCK;return `<label>${esc(p.name)}（定價 ${fmt(p.price)}）</label><input type="number" name="clover" min="${MIN}" max="${p.price}" value="${agentPrice(ag,p)}" ${lk?'disabled':''}>${lk?`<p class="muted">當月滿 3 條後可自訂 10,000–11,680（本月已付款 ${cp} 條，目前鎖定 ${fmt(p.price)}）</p>`:''}${lk?'':'<button>儲存</button>'}`})()}<p class="muted">小十字墜鍊目前為公司直營，不開放代理販售。</p></form>
