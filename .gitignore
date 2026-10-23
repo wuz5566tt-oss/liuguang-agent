@@ -2,3 +2,4 @@ node_modules/
 *.log
 db.bak.json
 test*.js
+MONGO_URI.txt

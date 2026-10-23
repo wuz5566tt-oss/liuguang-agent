@@ -1,7 +1,9 @@
 const express=require('express'),fs=require('fs'),crypto=require('crypto'),QR=require('qrcode');
 const app=express();app.use(express.urlencoded({extended:true}));app.use('/static',express.static(__dirname+'/public',{maxAge:'7d'}));
 const DB='./db.json',ADMIN_PW=process.env.ADMIN_PW||'admin2026',MIN=10000;
-let db;const save=()=>fs.writeFileSync(DB,JSON.stringify(db,null,1));
+let db,COL=null;const MURI=process.env.MONGODB_URI;let wq=Promise.resolve(),wt=null;
+const flush=()=>{wt=null;const snap=JSON.parse(JSON.stringify(db));delete snap._id;wq=wq.then(()=>COL.replaceOne({_id:'main'},{_id:'main',...snap},{upsert:true})).catch(e=>console.error('mongo save failed:',e.message));return wq};
+const save=()=>{if(!COL)return fs.writeFileSync(DB,JSON.stringify(db,null,1));if(!wt)wt=setTimeout(flush,300)};
 function seed(){const m=new Date(),ym=d=>d.toISOString();const ago=n=>new Date(Date.now()-n*864e5).toISOString();
 db={products:[{id:'clover',name:'幸運草墜鍊',price:11680,desc:'925銀胎，外層包覆純金。四片葉子，一片給勇氣、一片給好運、一片給被愛、一片留給未來的自己。附保卡標示金重與銀重。'},{id:'cross',name:'小十字墜鍊',price:15000,direct:true,wholesale:'待定',desc:'925銀胎，外層包覆純金。給走在自己路上的人，提醒自己不忘初衷。附保卡標示金重與銀重。'}],
 agents:[{code:'AMY01',name:'Amy 林',pin:'1111',phone:'0911-000-001',active:true,prices:{clover:11680,cross:15000}},{code:'BEN02',name:'Ben 陳',pin:'2222',phone:'0911-000-002',active:true,prices:{clover:10800,cross:14000}},{code:'CICI3',name:'Cici 黃',pin:'3333',phone:'0911-000-003',active:true,prices:{clover:11000,cross:15000}}],orders:[],seq:1};
@@ -18,7 +20,10 @@ const nowYm=()=>new Date(Date.now()+8*36e5).toISOString().slice(0,7);
 const ymOf=iso=>new Date(new Date(iso).getTime()+8*36e5).toISOString().slice(0,7);
 const fmt=n=>'NT$'+Number(n).toLocaleString('en-US');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-if(fs.existsSync(DB))db=JSON.parse(fs.readFileSync(DB));else seed();
+async function load(){if(MURI){const {MongoClient}=require('mongodb');const cl=new MongoClient(MURI);await cl.connect();COL=cl.db(process.env.MONGODB_DB||'liuguang').collection('state');
+const d=await COL.findOne({_id:'main'});if(d){delete d._id;db=d;console.log('db: loaded from mongo')}else{if(fs.existsSync(DB)){db=JSON.parse(fs.readFileSync(DB));save()}else seed();await flush();console.log('db: seeded mongo')}
+const bye=async()=>{if(wt){clearTimeout(wt);await flush()}process.exit(0)};process.on('SIGTERM',bye);process.on('SIGINT',bye)}
+else{if(fs.existsSync(DB))db=JSON.parse(fs.readFileSync(DB));else seed()}}
 const P=id=>db.products.find(p=>p.id==id),A=c=>db.agents.find(a=>a.code==String(c||'').toUpperCase().trim());
 function settle(code,ym){const os=db.orders.filter(o=>o.agentCode==code&&o.productId=='clover'&&o.paid&&ymOf(o.paidAt)==ym);const pcs=os.reduce((s,o)=>s+o.qty,0),w=tierOf(pcs);
 const retail=os.reduce((s,o)=>s+o.qty*o.unitPrice,0);return{pcs,w,retail,wholesale:pcs*w,profit:retail-pcs*w,orders:os}}
@@ -183,4 +188,4 @@ app.post('/admin/product',(q,r)=>{const p=P(q.body.id),v=parseInt(q.body.price);
 app.get('/admin/settle.csv',(q,r)=>{const ym=q.query.m||nowYm();const L=[['月份','代理代碼','代理姓名','件數','批發單價','客付總額','批發總額','應付代理利潤']];
 db.agents.forEach(a=>{const s=settle(a.code,ym);L.push([ym,a.code,a.name,s.pcs,s.w,s.retail,s.wholesale,s.profit])});
 r.setHeader('Content-Disposition',`attachment; filename="settlement-${ym}.csv"`);r.type('text/csv').send('\ufeff'+L.map(l=>l.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\r\n'))});
-app.set('trust proxy',true);const PORT=process.env.PORT||3080;app.listen(PORT,()=>console.log('up '+PORT));
+app.set('trust proxy',true);const PORT=process.env.PORT||3080;load().then(()=>app.listen(PORT,()=>console.log('up '+PORT))).catch(e=>{console.error('db load failed:',e.message);process.exit(1)});
