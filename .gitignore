@@ -1,0 +1,4 @@
+node_modules/
+*.log
+db.bak.json
+test*.js

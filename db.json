@@ -1,0 +1,176 @@
+{
+ "products": [
+  {
+   "id": "clover",
+   "name": "幸運草墜鍊",
+   "price": 11680,
+   "desc": "925銀胎，外層包覆純金。四片葉子，一片給勇氣、一片給好運、一片給被愛、一片留給未來的自己。附保卡標示金重與銀重。"
+  },
+  {
+   "id": "cross",
+   "name": "小十字墜鍊",
+   "price": 15000,
+   "direct": true,
+   "wholesale": "待定",
+   "desc": "925銀胎，外層包覆純金。給走在自己路上的人，提醒自己不忘初衷。附保卡標示金重與銀重。"
+  }
+ ],
+ "agents": [
+  {
+   "code": "AMY01",
+   "name": "Amy 林",
+   "pin": "1111",
+   "phone": "0911-000-001",
+   "active": true,
+   "prices": {
+    "clover": 11680,
+    "cross": 15000
+   }
+  },
+  {
+   "code": "BEN02",
+   "name": "Ben 陳",
+   "pin": "2222",
+   "phone": "0911-000-002",
+   "active": true,
+   "prices": {
+    "clover": 10800,
+    "cross": 14000
+   }
+  },
+  {
+   "code": "CICI3",
+   "name": "Cici 黃",
+   "pin": "3333",
+   "phone": "0911-000-003",
+   "active": true,
+   "prices": {
+    "clover": 11000,
+    "cross": 15000
+   }
+  }
+ ],
+ "orders": [
+  {
+   "id": 1,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "clover",
+   "qty": 2,
+   "unitPrice": 11680,
+   "agentCode": "AMY01",
+   "name": "示範客戶2",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 1
+  },
+  {
+   "id": 2,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "cross",
+   "qty": 1,
+   "unitPrice": 15000,
+   "agentCode": null,
+   "name": "示範客戶3",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 0
+  },
+  {
+   "id": 3,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "clover",
+   "qty": 1,
+   "unitPrice": 11680,
+   "agentCode": "AMY01",
+   "name": "示範客戶4",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 0,
+   "paidAt": null,
+   "shipped": 0
+  },
+  {
+   "id": 4,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "clover",
+   "qty": 4,
+   "unitPrice": 11680,
+   "agentCode": "BEN02",
+   "name": "示範客戶5",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 1
+  },
+  {
+   "id": 5,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "cross",
+   "qty": 3,
+   "unitPrice": 15000,
+   "agentCode": null,
+   "name": "示範客戶6",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 1
+  },
+  {
+   "id": 6,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "clover",
+   "qty": 2,
+   "unitPrice": 10800,
+   "agentCode": "BEN02",
+   "name": "示範客戶7",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 0
+  },
+  {
+   "id": 7,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "clover",
+   "qty": 1,
+   "unitPrice": 11680,
+   "agentCode": "CICI3",
+   "name": "示範客戶8",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 1,
+   "paidAt": "2026-10-23T07:52:13.605Z",
+   "shipped": 0
+  },
+  {
+   "id": 8,
+   "created": "2026-10-23T07:52:13.605Z",
+   "productId": "cross",
+   "qty": 1,
+   "unitPrice": 15000,
+   "agentCode": null,
+   "name": "示範客戶9",
+   "phone": "0922-123-456",
+   "address": "台北市信義區示範路1號",
+   "note": "",
+   "paid": 0,
+   "paidAt": null,
+   "shipped": 0
+  }
+ ],
+ "seq": 9
+}
